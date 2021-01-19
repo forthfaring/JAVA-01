@@ -1,5 +1,3 @@
-package org.wfy.grow.geektime.java.jvm;
-
 import java.io.FileInputStream;
 
 /**
