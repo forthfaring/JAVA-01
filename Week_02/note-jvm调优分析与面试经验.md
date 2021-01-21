@@ -1,6 +1,14 @@
-## 第3课
+## 1 GC日志解读与分析
 
-### 1、 使用 GCLogAnalysis.java 自己演练一遍串行/并行/CMS/G1的案例。
+###  GCLogAnalysis.java 
+
+启动参数，打印gc日志：
+
+```
+java -Xloggc:gc.demo.log -XX:+PrintGCDetails -XX:+PrintGCDateStamps GCLogAnalysis
+```
+
+
 
 ```
 import java.util.Random;
@@ -153,240 +161,48 @@ Process finished with exit code 1
 
 **[Times: user=0.02 sys=0.00, real=0.01 secs] **：用户进程的CPU占用时长、内核进程的CPU占用时长、实际运行时间。
 
-[user/sys/real的详细解释]: https://my.oschina.net/dabird/blog/714569
 
-**例1：**
 
-```
-[Times: user=11.53 sys=1.38, real=1.03 secs]
-```
+>[user/sys/real的详细解释]: https://my.oschina.net/dabird/blog/714569
+>
+>简单概括：user：所有gc线程此次GC花费的总时间，sys是操作系统花费在这次GC上的CPU时间，real实际执行时间。因为user+sys对应的是多个线程的时间和，所以user+sys可能大于real。
+>
+>**例1：**
+>
+>```
+>[Times: user=11.53 sys=1.38, real=1.03 secs]
+>```
+>
+>​	在这个例子中，`user` + `sys` 时间的和比 `real` 时间要大，这主要是因为日志时间是从 JVM 中获得的，而这个 JVM 在多核的处理器上被配置了多个 GC 线程，由于多个线程并行地执行 GC，因此整个 GC 工作被这些线程共享，最终导致实际的时钟时间（real）小于总的 CPU 时间（user + sys）。
+>
+>**例2：**
+>
+>```
+>[Times: user=0.09 sys=0.00, real=0.09 secs]
+>```
+>
+>​	上面的例子中的 GC 时间是从 Serial 垃圾收集器 （串行垃圾收集器）中获得的。由于 Serial 垃圾收集器是使用单线程进行垃圾收集的，因此 `real` 时间等于 `user` 和 `sys` 时间之和。
+>
+>​	在做性能优化时，我们一般采用 `real` 时间来优化程序。因为最终用户只关心点击页面发出请求到页面上展示出内容所花的时间，也就是响应时间，而不关心你到底使用了多少个 GC 线程或者处理器。但并不是说 `sys` 和 `user` 两个时间不重要，当我们想通过增加 GC 线程或者 CPU 数量来减少 GC 停顿时间时，可以参考这两个时间。
+>
 
-​	在这个例子中，`user` + `sys` 时间的和比 `real` 时间要大，这主要是因为日志时间是从 JVM 中获得的，而这个 JVM 在多核的处理器上被配置了多个 GC 线程，由于多个线程并行地执行 GC，因此整个 GC 工作被这些线程共享，最终导致实际的时钟时间（real）小于总的 CPU 时间（user + sys）。
 
-**例2：**
 
-```
-[Times: user=0.09 sys=0.00, real=0.09 secs]
-```
+### 2 JVM线程堆栈数据分析
 
-​	上面的例子中的 GC 时间是从 Serial 垃圾收集器 （串行垃圾收集器）中获得的。由于 Serial 垃圾收集器是使用单线程进行垃圾收集的，因此 `real` 时间等于 `user` 和 `sys` 时间之和。
 
-​	在做性能优化时，我们一般采用 `real` 时间来优化程序。因为最终用户只关心点击页面发出请求到页面上展示出内容所花的时间，也就是响应时间，而不关心你到底使用了多少个 GC 线程或者处理器。但并不是说 `sys` 和 `user` 两个时间不重要，当我们想通过增加 GC 线程或者 CPU 数量来减少 GC 停顿时间时，可以参考这两个时间。
 
+### 3 内存分析与相关工具*
 
 
 
+### 4 JVM 问题分析调优经验*
 
 
 
+### 5 GC 疑难情况问题分析
 
 
 
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-### 2、 使用压测工具（wrk或sb） ， 演练gateway-server-0.0.1-SNAPSHOT.jar示例。
-
-
-
-### 3、 (选做)如果自己本地有可以运行的项目， 可以按照2的方式进行演练。
-
-
-
-### 4、 (必做)根据上述自己对于1和2的演示， 写一段对于不同GC和堆内存的总结， 提交到github。 
-
-* Serial垃圾收集器
-
-  使用串行的gc策略，串行可以理解为gc线程为单线程，只能串行执行垃圾收集。意味着GC的效率比较低，吞吐量较低，暂时时间较长。但是由于算法简单，没有gc线程上下文切换等复杂机制，所以适用于极小堆内存的场景，比如小客户端程序。所以，JDK把Serial+Serial Old作为JVM client模式下的默认GC组合，Serial适用复制算法，Serial Old适用标记整理算法，分别执行年轻代和年老代的垃圾收集。
-
-* Parallel scavenge 
-
-Parallel scavenge 使用复制算法。吞吐量优先，
-
-* Parallel Old
-
-* parNew垃圾收集器
-
-Serial的多线程版本。使用并行的垃圾收集。
-
-* CMS垃圾收集器
-
-作用范围：old区
-
-算法：并发的标记清除算法
-
-原理描述：
-
-优点：最大暂停时间优先，省去了内存整理，执行效率高。
-
-缺点：容易产生内存碎片，可能导致GC频繁。
-
-* G1垃圾收集器
-* ZGC
-
-
-
-| GC收集器类型      | 作用范围   | 算法                  | 优点                                           | 缺点                                                         |
-| ----------------- | ---------- | --------------------- | ---------------------------------------------- | ------------------------------------------------------------ |
-| Serial            | young      | 复制+标记整理         |                                                | 使用串行的gc策略，串行可以理解为gc线程为单线程，只能串行执行垃圾收集。意味着GC的效率比较低，吞吐量较低，暂时时间较长。但是由于算法简单，没有gc线程上下文切换等复杂机制，所以适用于极小堆内存的场景，比如小客户端程序。所以，JDK把Serial+Serial Old作为JVM client模式下的默认GC组合，Serial适用复制算法，Serial Old适用标记整理算法，分别执行年轻代和年老代的垃圾收集。 |
-|                   | old        |                       |                                                |                                                              |
-| Parallel scavenge | young      | 复制                  |                                                |                                                              |
-| Parallel Old      | old        | 标记整理              |                                                |                                                              |
-| parNew            | young      | 复制                  |                                                |                                                              |
-| CMS               | old        | 并发的标记清除算法    | 最大暂停时间优先，省去了内存整理，执行效率高。 | 容易产生内存碎片，可能导致GC频繁。                           |
-| G1                | whole heap | young复制+old标记清除 |                                                |                                                              |
-| ZGC               | whole heap |                       |                                                |                                                              |
-| shenandoah        | whole heap |                       |                                                |                                                              |
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-###  
-
-## 第4课
-
-### 1、 （可选） 运行课上的例子， 以及 Netty 的例子， 分析相关现象
-
-```
-Thread.sleep(20);
--Xmx512m -Xms512m
-```
-
----
-
-#### HttpServer01  
-
-```
- wfy@wfy0828  ~/work/workspace  wrk -c 40 -d 30s http://localhost:8801
-Running 30s test @ http://localhost:8801
-  2 threads and 40 connections
-  Thread Stats   Avg      Stdev     Max   +/- Stdev
-    Latency   916.41ms   86.13ms 987.20ms   97.52%
-    Req/Sec     8.79      5.17    30.00     72.70%
-  444 requests in 30.07s, 60.02KB read
-  Socket errors: connect 0, read 1291, write 1, timeout 0
-Requests/sec:     14.76
-Transfer/sec:      2.00KB
-```
-
-30s内处理444个请求，平均延迟916ms。
-
-####  HttpServer02
-
-```
- wfy@wfy0828  ~/work/workspace  wrk -c 40 -d 30s http://localhost:8802
-Running 30s test @ http://localhost:8802
-  2 threads and 40 connections
-  Thread Stats   Avg      Stdev     Max   +/- Stdev
-    Latency    25.80ms    3.59ms  60.79ms   72.62%
-    Req/Sec   117.34     39.76   245.00     69.30%
-  7034 requests in 30.06s, 1.60MB read
-  Socket errors: connect 0, read 45267, write 33, timeout 0
-Requests/sec:    233.97
-Transfer/sec:     54.39KB
-```
-
-30s内处理7034个请求，平均延迟25ms。
-
-#### HttpServer03
-
-```
- wfy@wfy0828  ~/work/workspace  wrk -c 40 -d 30s http://localhost:8803
-Running 30s test @ http://localhost:8803
-  2 threads and 40 connections
-  Thread Stats   Avg      Stdev     Max   +/- Stdev
-    Latency   152.35ms    9.07ms 170.76ms   77.74%
-    Req/Sec    23.38     14.30    79.00     64.78%
-  1343 requests in 30.10s, 273.51KB read
-  Socket errors: connect 0, read 7836, write 15, timeout 0
-Requests/sec:     44.62
-Transfer/sec:      9.09KB
-```
-
-30s内处理1343个请求，平均延迟152ms。
-
-#### NettyHttpServer 
-
-除了自有代码逻辑，未额外设置线程sleep。
-
-```
- wfy@wfy0828  ~/work/workspace  wrk -c 40 -d 30s http://127.0.0.1:8808/test
-Running 30s test @ http://127.0.0.1:8808/test
-  2 threads and 40 connections
-  Thread Stats   Avg      Stdev     Max   +/- Stdev
-    Latency     2.04ms   13.18ms 404.52ms   97.63%
-    Req/Sec    45.41k    14.31k   77.87k    75.42%
-  2696701 requests in 30.03s, 275.18MB read
-Requests/sec:  89809.51
-Transfer/sec:      9.16MB
-```
-
-30s内处理2696701个请求，平均延迟2ms!!!
-
-#### 分析：
-
-HttpServer01由于server端只有一个线程监听客户端的请求，所以只能串行执行。server线程接收client的请求后，需要处理请求，直到成功响应后，才能接入下一个请求。所以速度比较慢。
-
-HttpServer03使用了线程池，线程数为CPU核数+2，所以速度有所提升。
-
-HttpServer02是每接收到一个请求，就创建一个线程处理。因为，在不考虑线程数多至线程上下文切换成本过大的情况下，可能性能最好，当然 也可能是数据样本太少的原因。
-
-NettyHttpServer使用了NIO模型，不同于阻塞型IO模型。**netty使用selector/epoll的NIO模型：1、避免了server应用进程向内核请求数据的阻塞；2、与内核共享了内存空间；3、fd没有了限制；4、通过事件回调解决了每次需要遍历selector中所有fd的问题。**所以，并发量大大增加。
-
-### 2、 （必做） 写一段代码， 使用 HttpClient 或 OkHttp 访问 http://localhost:8801， 代码提交到Github。  
-
-[OkHttpRequest.java](nio01/src/main/java/java0/nio01/OkHttpRequest.java)
+### 6 JVM 常见面试问题汇总*  
 
