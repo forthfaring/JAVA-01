@@ -77,13 +77,61 @@ jstack pid > file
 
 ### volatile
 
+volatile对应的变量修改时，底层机器指令会生成一个lock指令。
 
+作用：1、使得对变量的修改操作都会直接更新主存，而不是缓存在CPU缓存中、等待CPU自动刷新缓存到内存。
+
+2、使得其他处理器(线程)的对这个变量的CPU缓存失效。
 
 >分析volatile字节码：https://blog.csdn.net/a7980718/article/details/83932123
 >
 >使用hsdis与jitwatch查看JIT后的汇编码：https://www.jianshu.com/p/78f71c033fae
 >
+>从指令重排序到java内存模型：https://tech.meituan.com/2014/09/23/java-memory-reordering.html
+>
 >备注：待实践验证
+
+### synchronized
+
+一种重量级锁。但是通过偏向锁、轻量级锁等优化，变得没那么重了。
+
+通过monitorenter/monitorexitJVM指令实现。
+
+锁信息存储在堆中对象的header里。
+
+![image-20210128145011424](image/image-20210128145011424.png)
+
+* 对象头
+
+![image-20210128145030638](image/image-20210128145030638.png)
+
+* 32位机的markword
+
+![image-20210128145245182](image/image-20210128145245182.png)
+
+![image-20210128145140175](image/image-20210128145140175.png)
+
+* 64位的markword
+
+![image-20210128145841550](image/image-20210128145841550.png)
+
+#### 锁的几种状态
+
+#### 无锁、偏向锁、轻量级锁、重量级锁
+
+### 原子操作
+
+通过CAS指令+重试机制实现。
+
+
+
+
+
+
+
+
+
+
 
 
 
