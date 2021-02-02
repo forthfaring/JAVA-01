@@ -183,33 +183,73 @@ join底层使用wait实现。
 #### 线程池核心类 ThreadPoolExecutor
 
 * 核心参数
+  
+* 核心线程数
+  
+* 最大线程数
 
-  * 核心线程数
+* 缓冲队列
 
-  * 最大线程数
+  * ArrayBlockingQueue   规定大小的队列。数组实现
+  * LinkedBlockingQueue   规定大小的队列。链表实现。
+  * PriorityBlockingQueue 无界队列。数组实现。不是FIFO，有优先级
+  * SynchronousQueue  同步队列。入队和出队有同步锁
 
-  * 缓冲队列
+* 拒绝策略
 
-    * ArrayBlockingQueue   规定大小的队列。数组实现
-    * LinkedBlockingQueue   规定大小的队列。链表实现。
-    * PriorityBlockingQueue 无界队列。数组实现。不是FIFO，有优先级
-    * SynchronousQueue  同步队列。入队和出队有同步锁
+  * AbortPolicy   丢弃任务并抛出 RejectedExecutionException
+    异常  
+  * DiscardPolicy：丢弃任务，但是不抛出异常。  
+  * DiscardOldestPolicy：丢弃队列最前面的任务，然后重新提
+    交被拒绝的任务  
+  * CallerRunsPolicy：由调用线程（提交任务的线程）处理该任
+    务  
 
-  * 拒绝策略
+* 线程回收时间
 
-    * AbortPolicy   丢弃任务并抛出 RejectedExecutionException
-      异常  
-    * DiscardPolicy：丢弃任务，但是不抛出异常。  
-    * DiscardOldestPolicy：丢弃队列最前面的任务，然后重新提
-      交被拒绝的任务  
-    * CallerRunsPolicy：由调用线程（提交任务的线程）处理该任
-      务  
+* ThreadFactory 
 
-  * 线程回收时间
+  * 重写newThread方法，给线程设置统一的名字和其他属性。
 
-  * ThreadFactory 
+  ![image-20210201161409027](image/image-20210201161409027.png)
 
-    * 重写newThread方法，给线程设置统一的名字和其他属性。
 
-    ![image-20210201161409027](image/image-20210201161409027.png)
+
+>com.google.common.util.concurrent.ThreadFactoryBuilder 建造者可以用于构造ThreadFactory
+
+核心线程数、最大线程数和队列、策略的关系图：
+
+![image-20210126230613693](file://D:\workspace\JAVA-01\Week_03\image\image-20210126230613693.png?lastModify=1612235292)
+
+#### tomcat等线程池优化设置，示例：
+
+```
+public class ExecutorServiceTest02 {
+    public static void main(String[] args) {
+        ThreadFactoryBuilder builder = new ThreadFactoryBuilder();
+        builder.setNameFormat("rpc-pool-%d");
+        ThreadPoolExecutor executor = new ThreadPoolExecutor(100, 100, 0, TimeUnit.SECONDS, new LinkedBlockingQueue(1000), builder.build());
+        executor.prestartAllCoreThreads();
+    }
+}
+jps -l
+jstack 36848
+可以看到线程日志如下，rpc-pool-xx一共有一百个线程，线程池中未运行的线程状态为WAITING (parking)。
+所以在优化tomcat等线程池时，需要根据线程名称，判断高峰期处于运行和等待状态的线程数量，酌情增加或减少线程池大小。
+
+"rpc-pool-99" #111 prio=5 os_prio=0 tid=0x000000001fecd000 nid=0x56fc waiting on condition [0x0000000026cee000]
+   java.lang.Thread.State: WAITING (parking)
+        at sun.misc.Unsafe.park(Native Method)
+        - parking to wait for  <0x000000076bc503f0> (a java.util.concurrent.locks.AbstractQueuedSynchronizer$ConditionObject)
+        at java.util.concurrent.locks.LockSupport.park(LockSupport.java:175)
+        at java.util.concurrent.locks.AbstractQueuedSynchronizer$ConditionObject.await(AbstractQueuedSynchronizer.java:2039)
+        at java.util.concurrent.LinkedBlockingQueue.take(LinkedBlockingQueue.java:442)
+        at java.util.concurrent.ThreadPoolExecutor.getTask(ThreadPoolExecutor.java:1074)
+        at java.util.concurrent.ThreadPoolExecutor.runWorker(ThreadPoolExecutor.java:1134)
+        at java.util.concurrent.ThreadPoolExecutor$Worker.run(ThreadPoolExecutor.java:624)
+        at java.lang.Thread.run(Thread.java:748)
+
+```
+
+
 
