@@ -1,8 +1,6 @@
-## 多线程基础
+[TOC]
 
-### 为什么会有多线程？
-
-
+## 前言 为什么会有多线程？
 
 * 应用程序为单进程，如何充分利用多核CPU，让这个进程运行速度更快？
 * CPU与内存、磁盘等多级缓存之有性能差距过大，利用多线程充分利用CPU资源。
@@ -15,7 +13,7 @@
 
 
 
-## 并发编程的挑战
+## 第一章 并发编程的挑战
 
 ### 上下文切换的性能损耗
 
@@ -44,6 +42,39 @@ jstack pid > file
   11 WAITING(onobjectmonitor)
   21 WAITING(parking)
 ```
+
+
+
+#### tomcat等线程池优化设置，示例：
+
+```
+public class ExecutorServiceTest02 {
+    public static void main(String[] args) {
+        ThreadFactoryBuilder builder = new ThreadFactoryBuilder();
+        builder.setNameFormat("rpc-pool-%d");
+        ThreadPoolExecutor executor = new ThreadPoolExecutor(100, 100, 0, TimeUnit.SECONDS, new LinkedBlockingQueue(1000), builder.build());
+        executor.prestartAllCoreThreads();
+    }
+}
+jps -l
+jstack 36848
+可以看到线程日志如下，rpc-pool-xx一共有一百个线程，线程池中未运行的线程状态为WAITING (parking)。
+所以在优化tomcat等线程池时，需要根据线程名称，判断高峰期处于运行和等待状态的线程数量，酌情增加或减少线程池大小。
+
+"rpc-pool-99" #111 prio=5 os_prio=0 tid=0x000000001fecd000 nid=0x56fc waiting on condition [0x0000000026cee000]
+   java.lang.Thread.State: WAITING (parking)
+        at sun.misc.Unsafe.park(Native Method)
+        - parking to wait for  <0x000000076bc503f0> (a java.util.concurrent.locks.AbstractQueuedSynchronizer$ConditionObject)
+        at java.util.concurrent.locks.LockSupport.park(LockSupport.java:175)
+        at java.util.concurrent.locks.AbstractQueuedSynchronizer$ConditionObject.await(AbstractQueuedSynchronizer.java:2039)
+        at java.util.concurrent.LinkedBlockingQueue.take(LinkedBlockingQueue.java:442)
+        at java.util.concurrent.ThreadPoolExecutor.getTask(ThreadPoolExecutor.java:1074)
+        at java.util.concurrent.ThreadPoolExecutor.runWorker(ThreadPoolExecutor.java:1134)
+        at java.util.concurrent.ThreadPoolExecutor$Worker.run(ThreadPoolExecutor.java:624)
+        at java.lang.Thread.run(Thread.java:748)
+```
+
+
 
 
 
@@ -127,15 +158,7 @@ volatile对应的变量修改时，底层机器指令会生成一个lock指令�
 
 
 
-
-
-
-
-
-
-
-
-## Java 多线程*
+## 第4章 Java 并发编程基础
 
 #### 线程优先级Priority 
 
@@ -487,16 +510,6 @@ new ThreadFactoryBuilder().setNameFormat("XX-task-%d").build();
 ​			当然，也可以根据应用场景需要来实现RejectedExecutionHandler接口自定义策略。如记录 日志或持久化存储不能处理的任务。	
 
 ​	
-
-
-
-如何多线程处理计算密集型的应用？
-
-wait、notify的使用方法。
-
-
-
-
 
 
 
