@@ -20,3 +20,8 @@
 
 [WhileYield](demo/src/main/java/com/example/demo/one/Method09WhileYield.java)
 
+
+### 把多线程和并发相关知识梳理一遍，画一个脑图，截图上传到github上。 可选工具:xmind，百度脑图，wps，MindManage，或其他。
+
+![image-20210207002359247](image/image-20210207002359247.png)
+

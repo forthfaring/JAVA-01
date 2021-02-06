@@ -96,8 +96,7 @@ java Thread与os Thead的启动交互过程
   
   // 满足some condition
   thread.interrupt();
-```
-  
+  ```
 * wait/notify/notifyAll
 
   wait方法所在的线程是消费者。notify方法所在的线程是生产者。构成了整个等待/通知模式。wait的线程进入等待队列，被notify之后回到阻塞队列，等待锁可获取时竞争获取锁。
@@ -114,7 +113,7 @@ java Thread与os Thead的启动交互过程
 
   3、如果是计算密集型的操作？
 
-  ​		分段处理，每个片段检查一下状态，是不是要终止。  
+  		分段处理，每个片段检查一下状态，是不是要终止。  
 
 ## 4、多线程有哪些问题？
 
@@ -258,7 +257,6 @@ java Thread与os Thead的启动交互过程
 
 #### tomcat等线程池优化设置，示例：
 
-```
 public class ExecutorServiceTest02 {
     public static void main(String[] args) {
         ThreadFactoryBuilder builder = new ThreadFactoryBuilder();
@@ -276,17 +274,13 @@ jstack 36848
    java.lang.Thread.State: WAITING (parking)
         at sun.misc.Unsafe.park(Native Method)
         - parking to wait for  <0x000000076bc503f0> (a java.util.concurrent.locks.AbstractQueuedSynchronizer$ConditionObject)
-        at java.util.concurrent.locks.LockSupport.park(LockSupport.java:175)
-        at java.util.concurrent.locks.AbstractQueuedSynchronizer$ConditionObject.await(AbstractQueuedSynchronizer.java:2039)
-        at java.util.concurrent.LinkedBlockingQueue.take(LinkedBlockingQueue.java:442)
-        at java.util.concurrent.ThreadPoolExecutor.getTask(ThreadPoolExecutor.java:1074)
-        at java.util.concurrent.ThreadPoolExecutor.runWorker(ThreadPoolExecutor.java:1134)
-        at java.util.concurrent.ThreadPoolExecutor$Worker.run(ThreadPoolExecutor.java:624)
-        at java.lang.Thread.run(Thread.java:748)
-
-```
-
-
+                at java.util.concurrent.locks.LockSupport.park(LockSupport.java:175)
+                at java.util.concurrent.locks.AbstractQueuedSynchronizer$ConditionObject.await(AbstractQueuedSynchronizer.java:2039)
+                at java.util.concurrent.LinkedBlockingQueue.take(LinkedBlockingQueue.java:442)
+                at java.util.concurrent.ThreadPoolExecutor.getTask(ThreadPoolExecutor.java:1074)
+                at java.util.concurrent.ThreadPoolExecutor.runWorker(ThreadPoolExecutor.java:1134)
+                at java.util.concurrent.ThreadPoolExecutor$Worker.run(ThreadPoolExecutor.java:624)
+                at java.lang.Thread.run(Thread.java:748)
 
 ### 锁的位置和粒度合理
 
@@ -295,10 +289,3 @@ jstack 36848
 ## 8、多线程编程导致代码复杂度上升
 
 ### 线程池统一调度线程，对业务实现屏蔽线程相关细节
-
-
-
-
-
-
-
