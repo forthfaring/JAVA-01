@@ -205,12 +205,39 @@ java Thread与os Thead的启动交互过程
 
   提供执行任务无返回值的接口。
 
+```
+void execute(Runnable command);
+```
+
+
+
 * ExcutorService: 接口 API
 
-  提供线程池的关闭、有返回值的任务处理接口
+  提供线程池的关闭、有返回值的任务处理接口。
+
+  常用接口：
+
+```
+    //停止接收新任务，原来的任务继续执行
+    1停止接收新的submit的任务；
+    2已经提交的任务（包括正在跑的和队列中等待的）,会继续执行完成；
+    等到第2步完成后，才真正停止；
+    void shutdown();
+	//停止接收新任务，原来的任务停止执行
+    跟 shutdown() 一样，先停止接收新submit的任务；
+    忽略队列里等待的任务；
+    尝试将正在执行的任务interrupt中断；
+    返回未执行的任务列表；
+    说明：它试图终止线程的方法是通过调用 Thread.interrupt() 方法来实现的，这种方法的作用有限，如果线程中没有sleep 、wait、		Condition、定时锁等应用, interrupt() 方法是无法中断当前的线程的。所以，shutdownNow() 并不代表线程池就一定立即就能退出，		它也可	能必须要等待所有正在执行的任务都执行完成了才能退出。但是大多数时候是能立即退出的。
+    List<Runnable> shutdownNow()
+    boolean isShutdown();
+    <T> Future<T> submit(Callable<T> task);
+    <T> Future<T> submit(Runnable task, T result);
+```
+
+
 
 * ThreadFactory  ：线程工厂
-
 * Executors: 线程池工具类
 
 
