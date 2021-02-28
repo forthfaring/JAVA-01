@@ -1,5 +1,15 @@
 [TOC]
 
+## 多线程基础
+
+## java多线程
+
+## 线程安全
+
+## 线程池原理
+
+
+
 ## 1、什么是线程、进程？
 
 > **线程**（英语：thread）是[操作系统](https://zh.wikipedia.org/wiki/操作系统)能够进行运算[调度](https://zh.wikipedia.org/wiki/调度)的最小单位。大部分情况下，它被包含在[进程](https://zh.wikipedia.org/wiki/进程)之中，是[进程](https://zh.wikipedia.org/wiki/进程)中的实际运作单位。一条线程指的是[进程](https://zh.wikipedia.org/wiki/进程)中一个单一顺序的控制流，一个进程中可以并发多个线程，每条线程并行执行不同的任务。在[Unix System V](https://zh.wikipedia.org/wiki/Unix)及[SunOS](https://zh.wikipedia.org/wiki/SunOS)中也被称为轻量进程（lightweight processes），但轻量进程更多指内核线程（kernel thread），而把用户线程（user thread）称为线程。
@@ -206,6 +216,7 @@ java Thread与os Thead的启动交互过程
   提供执行任务无返回值的接口。
 
 ```
+//出现异常时，会自己打印出异常堆栈，不能抛出到外层
 void execute(Runnable command);
 ```
 
@@ -231,6 +242,7 @@ void execute(Runnable command);
     说明：它试图终止线程的方法是通过调用 Thread.interrupt() 方法来实现的，这种方法的作用有限，如果线程中没有sleep 、wait、		Condition、定时锁等应用, interrupt() 方法是无法中断当前的线程的。所以，shutdownNow() 并不代表线程池就一定立即就能退出，		它也可	能必须要等待所有正在执行的任务都执行完成了才能退出。但是大多数时候是能立即退出的。
     List<Runnable> shutdownNow()
     boolean isShutdown();
+    //出现异常时，不会默认打开异常堆栈。调用get时会在外层抛出异常。
     <T> Future<T> submit(Callable<T> task);
     <T> Future<T> submit(Runnable task, T result);
 ```
@@ -239,11 +251,26 @@ void execute(Runnable command);
 
 * ThreadFactory  ：线程工厂
 * Executors: 线程池工具类
-
+    * newSingleThreadExecutor
+        创建一个单线程的线程池。这个线程池只有一个线程在工作，也就是相当于单线程串行执行所有 任务。如果这个唯一的线程因为异常结束，那么会有一个新的线程来替代它。此线程池保证所有 任务的执行顺序按照任务的提交顺序执行。
+    * newFixedThreadPool
+        创建固定大小的线程池。每次提交一个任务就创建一个线程，直到线程达到线程池的最大大小。 线程池的大小一旦达到最大值就会保持不变，如果某个线程因为执行异常而结束，那么线程池会 补充一个新线程。
+    3. newCachedThreadPool
+    创建一个可缓存的线程池。如果线程池的大小超过了处理任务所需要的线程，
+    那么就会回收部分空闲(60秒不执行任务)的线程，当任务数增加时，此线程池又可以智能的添 加新线程来处理任务。此线程池不会对线程池大小做限制，线程池大小完全依赖于操作系统(或 者说JVM)能够创建的最大线程大小。
+    3. newScheduledThreadPool
+    创建一个大小无限的线程池。此线程池支持定时以及周期性执行任务的需求。
 
 #### 线程池核心类 ThreadPoolExecutor
 
-* 核心参数
+线程池运行核心原理：
+
+当有新的任务被提交时，按1234的顺序执行逻辑
+
+1. 判断 如果小于corePoolSize，就 【创建】线程执行任务
+2. 如果corePoolSize满了，就加入 workQueue
+3. 如果workQueue满了，小于maximumPoolSize， 就【创建】 线程执行任务
+4. 如果最大线程数已满，则执行拒绝策略处理器
 
 * 核心线程数
 
@@ -254,7 +281,7 @@ void execute(Runnable command);
   * ArrayBlockingQueue   规定大小的队列。数组实现
   * LinkedBlockingQueue   规定大小的队列。链表实现。
   * PriorityBlockingQueue 无界队列。数组实现。不是FIFO，有优先级
-  * SynchronousQueue  同步队列。入队和出队有同步锁
+  * SynchronousQueue  同步队列。入队和出队有同步锁。功能：队列不存储数据。每次有请求时直接交给线程处理。只有max线程池数没有限制或者任务可以被拒绝时使用这种队列才有意义。
 
 * 拒绝策略
 
@@ -263,10 +290,10 @@ void execute(Runnable command);
   * DiscardPolicy：丢弃任务，但是不抛出异常。  
   * DiscardOldestPolicy：丢弃队列最前面的任务，然后重新提
     交被拒绝的任务  
-  * CallerRunsPolicy：由调用线程（提交任务的线程）处理该任
+  * CallerRunsPolicy：由调用线程（提交任务的父线程）处理该任
     务  
 
-* 线程回收时间
+* 线程回收时间keepAliveTime(回收默认指的是最大线程数减去核心线程数的线程)
 
 * ThreadFactory 
 
@@ -278,9 +305,7 @@ void execute(Runnable command);
 
 >com.google.common.util.concurrent.ThreadFactoryBuilder 建造者可以用于构造ThreadFactory
 
-核心线程数、最大线程数和队列、策略的关系图：
 
-![image-20210126230613693](file://D:\workspace\JAVA-01\Week_03\image\image-20210126230613693.png?lastModify=1612235292)
 
 #### tomcat等线程池优化设置，示例：
 
@@ -300,6 +325,7 @@ jstack 36848
 "rpc-pool-99" #111 prio=5 os_prio=0 tid=0x000000001fecd000 nid=0x56fc waiting on condition [0x0000000026cee000]
    java.lang.Thread.State: WAITING (parking)
         at sun.misc.Unsafe.park(Native Method)
+
         - parking to wait for  <0x000000076bc503f0> (a java.util.concurrent.locks.AbstractQueuedSynchronizer$ConditionObject)
                 at java.util.concurrent.locks.LockSupport.park(LockSupport.java:175)
                 at java.util.concurrent.locks.AbstractQueuedSynchronizer$ConditionObject.await(AbstractQueuedSynchronizer.java:2039)
@@ -308,6 +334,16 @@ jstack 36848
                 at java.util.concurrent.ThreadPoolExecutor.runWorker(ThreadPoolExecutor.java:1134)
                 at java.util.concurrent.ThreadPoolExecutor$Worker.run(ThreadPoolExecutor.java:624)
                 at java.lang.Thread.run(Thread.java:748)
+
+#### 线程池大小设置
+
+不是越大越好，太小肯定也不好: 假设核心数为N，
+
+1、如果是CPU密集型应用，则线程池大小设置为N或N+1 
+
+2、如果是IO密集型应用，则线程池大小设置为2N或2N+2
+
+这里只是一般估计值，如果要精确，需要根据具体业务线程运行的IO占用和CPU占用时间比例确定。
 
 ### 锁的位置和粒度合理
 
