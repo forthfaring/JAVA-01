@@ -293,7 +293,8 @@ NULL，not，not in，函数等
 - sequence（oracle）
 - 模拟 seq（专门表模拟统一主键）
 - UUID
-- 时间戳/随机数 - snowflake
+- 时间戳/随机数 
+- snowflake
 
 ## 高效分页
 - 分页:count/pageSize/pageNum, 带条件的查询语句
