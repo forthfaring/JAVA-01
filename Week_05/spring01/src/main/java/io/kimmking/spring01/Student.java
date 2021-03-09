@@ -15,7 +15,6 @@ import java.io.Serializable;
 
 @Data
 @AllArgsConstructor
-@NoArgsConstructor
 @ToString
 public class Student implements Serializable, BeanNameAware, ApplicationContextAware {
 
@@ -25,7 +24,10 @@ public class Student implements Serializable, BeanNameAware, ApplicationContextA
 
     private String beanName;
     private ApplicationContext applicationContext;
-    
+
+    public Student() {
+    }
+
     public void init(){
         System.out.println("hello...........");
     }

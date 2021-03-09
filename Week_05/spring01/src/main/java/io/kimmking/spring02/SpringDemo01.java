@@ -12,15 +12,15 @@ public class SpringDemo01 {
         ApplicationContext context = new ClassPathXmlApplicationContext("applicationContext.xml");
 //        Student student123 = context.getBean(Student.class);
         
-        Student student123 = (Student) context.getBean("student123");
-        System.out.println(student123.toString());
-
-        student123.print();
-        
-        Student student100 = (Student) context.getBean("student100");
-        System.out.println(student100.toString());
-
-        student100.print();
+//        Student student123 = (Student) context.getBean("student123");
+//        System.out.println(student123.toString());
+//
+//        student123.print();
+//
+//        Student student100 = (Student) context.getBean("student100");
+//        System.out.println(student100.toString());
+//
+//        student100.print();
     
         Klass class1 = context.getBean(Klass.class);
         System.out.println(class1);

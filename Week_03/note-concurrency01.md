@@ -153,11 +153,17 @@ java Thread与os Thead的启动交互过程
 
   过程中指令的有序性。
 
+### java内存模型
+
+java内存模型主要为了在特地场景下禁用CPU缓存和编译优化（指令重排序）。内存模型主要包括提供了volatile、synchronized、final和6个happen-before原则。
+
 ### happen-before原则
 
+happen-before原则指的是前一个操作对后一个操作内存可见。
+
 1. 程序次序规则：一个线程内，按照代码先后顺序
-2. 锁定规则：一个 unLock 操作先行发生于后面对同一个锁的 lock 操作
-3. Volatile 变量规则：对一个变量的写操作先行发生于后面对这个变量的读操作
+2. 锁定规则：一个 unLock 操作先行发生于后面对同一个锁的 lock 操作（所以注意！！：synchronized解锁只对加锁可见。所以vector的）
+3. Volatile 变量规则：对一个Volatile 变量的写操作先行发生于后面对这个变量的读操作
 4. 传递规则：如果操作 A 先行发生于操作 B，而操作 B 又先行发生于操作 C，则可以得出 A 先于 C
 5. 线程启动规则：Thread 对象的 start() 方法先行发生于此线程的每一个动作
 6. 线程中断规则：对线程 interrupt() 方法的调用先行发生于被中断线程的代码检测到中断事件的发生
@@ -175,9 +181,11 @@ java Thread与os Thead的启动交互过程
 
 字节码层面：ACC_VOLATILE 成员变量修饰符
 
+注意：volatile修饰数组时，无法保证数组中元素的可见性。
+
 ### synchronized
 
-作用：保证synchronized修饰的代码块同一时刻只有一个线程在执行
+作用：保证synchronized修饰的代码块同一时刻只有一个线程在执行。同时解决了原子性、可见性和有序性问题。
 
 字节码层面：monitorenter、monitorexit、ACC_SYNCHRONIZED（方法修饰符）
 

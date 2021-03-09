@@ -42,7 +42,7 @@
     <bean id="aop2" class="io.kimmking.spring02.Aop2" />
     
 <!--    <aop:aspectj-autoproxy proxy-target-class="true" />-->
-    <aop:aspectj-autoproxy  />
+    <aop:aspectj-autoproxy />
     
     <aop:config>
         <aop:pointcut expression="execution(* io.kimmking.aop.*.*(..))" id="p1" /> <!--切点-->
