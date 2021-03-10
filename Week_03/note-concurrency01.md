@@ -286,10 +286,20 @@ void execute(Runnable command);
 
 * 缓冲队列
 
+  > ArrayBlockingQueue：一个由数组结构组成的有界阻塞队列。
+  > ·LinkedBlockingQueue：一个由链表结构组成的有界阻塞队列。
+  > ·PriorityBlockingQueue：一个支持优先级排序的无界阻塞队列。
+  > ·DelayQueue：一个使用优先级队列实现的无界阻塞队列。
+  > ·SynchronousQueue：一个不存储元素的阻塞队列。
+  > ·LinkedTransferQueue：一个由链表结构组成的无界阻塞队列。
+  > ·LinkedBlockingDeque：一个由链表结构组成的双向阻塞队列。  
+
   * ArrayBlockingQueue   规定大小的队列。数组实现
   * LinkedBlockingQueue   规定大小的队列。链表实现。
   * PriorityBlockingQueue 无界队列。数组实现。不是FIFO，有优先级
   * SynchronousQueue  同步队列。入队和出队有同步锁。功能：队列不存储数据。每次有请求时直接交给线程处理。只有max线程池数没有限制或者任务可以被拒绝时使用这种队列才有意义。
+
+  ![image-20210310110006766](image/image-20210310110006766.png)
 
 * 拒绝策略
 
