@@ -1,0 +1,10 @@
+- [ ] MQ
+- [ ] 分布式缓存问题
+- [ ] redis
+- [ ] 分布式事务
+- [ ] zookeeper
+- [ ] dubbo和springcloud
+- [ ] springboot 
+- [ ] nio、网络相关
+- [ ] 分库分表、读写分离、主从切换
+- [ ] 
