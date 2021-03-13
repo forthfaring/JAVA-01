@@ -65,11 +65,14 @@ Sharding-proxy配置文件：[sharding-01/src/main/resources/config-sharding.yam
 ### 1、(选做)列举常见的分布式事务，简单分析其使用场景和优缺点。
 ### 2、(必做)基于 hmily TCC 或 ShardingSphere 的 Atomikos XA 实现一个简单的分布 式事务应用 demo(二选一)，提交到 Github。
 
+由于时间关系就直接本地跑了一遍hmily提供的官方demo，后续再写一个自己的demo。
 
 
 
+### 3、(选做)基于 ShardingSphere narayana XA 实现一个简单的分布式事务 demo。 
 
-### 3、(选做)基于 ShardingSphere narayana XA 实现一个简单的分布式事务 demo。 4、(选做)基于 seata 框架实现 TCC 或 AT 模式的分布式事务 demo。
+### 4、(选做)基于 seata 框架实现 TCC 或 AT 模式的分布式事务 demo。
+
 ### 5、(选做☆)设计实现一个简单的 XA 分布式事务框架 demo，只需要能管理和调用2 个 MySQL 的本地事务即可，不需要考虑全局事务的持久化和恢复、高可用等。
 ### 6、(选做☆)设计实现一个 TCC 分布式事务框架的简单 Demo，需要实现事务管理器， 不需要实现全局事务的持久化和恢复、高可用等。
 ### 7、(选做☆)设计实现一个 AT 分布式事务框架的简单 Demo，仅需要支持根据主键 id 进行的单个删改操作的 SQL 或插入操作的事务。
